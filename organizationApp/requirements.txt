@@ -3,3 +3,6 @@ flask
 flask_pymongo
 python-dotenv
 Werkzeug
+Flask-Testing
+pytest
+pytest-mock

@@ -1,0 +1,7 @@
+[pytest]
+testpaths = tests         
+python_files = test_*.py   
+minversion = 6.0
+addopts = --maxfail=3 -v  
+log_cli = true             
+log_cli_level = DEBUG     

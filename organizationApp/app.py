@@ -19,12 +19,6 @@ mongo = PyMongo(app)
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# After loading environment variables
-logger.debug("MongoDB URI: %s", os.getenv('MONGODB_URI'))
-logger.debug("MongoDB URI: %s", os.getenv('MONGO_URI'))
-
-
-
 # Folder to save uploaded pictures
 app.config['UPLOAD_FOLDER'] = './uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -33,17 +27,20 @@ members = mongo.db.members
 
 # GET Member List with search and pagination
 @app.route('/members', methods=['GET'])
-
 def get_members():
-    
-
     search_query = request.args.get('search', '')
     page = int(request.args.get('page', 1))
     per_page = 10
 
     query = {}
     if search_query:
-        query = {"name": {"$regex": search_query, "$options": "i"}}
+        # Search for members where 'name' or 'reports_to' contains the search query
+        query = {
+            "$or": [
+                {"name": {"$regex": search_query, "$options": "i"}},
+                {"reports_to": {"$regex": search_query, "$options": "i"}}
+            ]
+        }
 
     total_members = members.count_documents(query)
     paginated_members = members.find(query).skip((page - 1) * per_page).limit(per_page)
@@ -58,6 +55,8 @@ def get_members():
         "total_pages": (total_members // per_page) + 1
     })
 
+
+
 # POST Create Member with picture upload
 @app.route('/members', methods=['POST'])
 def add_member():
@@ -67,11 +66,15 @@ def add_member():
         logger.debug("Request form data: %s", request.form)
         logger.debug("Request files data: %s", request.files)
 
-
-        data = request.get_json()  # Get the JSON payload
-        name = data.get('name')
-        position = data.get('position')
-        reports_to = data.get('reports_to')
+        # data = request.get_json()  # Get the JSON payload
+        # name = data.get('name')
+        # position = data.get('position')
+        # reports_to = data.get('reports_to')
+        # picture_base64 = data.get('picture')  # Expecting Base64 string
+        
+        name = request.form.get('name')
+        position = request.form.get('position')
+        reports_to = request.form.get('reports_to')
         picture = request.files.get('picture')  # Still use request.files for file uploads
 
         # Check for required fields
@@ -81,9 +84,9 @@ def add_member():
         if not position:
             logger.error("Position is missing.")
             return jsonify({"error": "Position is required."}), 400
-        # if not picture:
-        #     logger.error("Picture is missing.")
-        #     return jsonify({"error": "Picture is required."}), 400
+        if not picture:
+            logger.error("Picture is missing.")
+            return jsonify({"error": "Picture is required."}), 400
 
         # If a picture is uploaded, handle the file upload
         picture_path = None
@@ -96,6 +99,11 @@ def add_member():
                 logger.error("Error saving picture: %s", str(e))
                 return jsonify({"error": "Failed to save picture."}), 500
 
+        # Save the picture
+        # filename = secure_filename(picture.filename)
+        # picture_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        # picture.save(picture_path)
+
         # Insert member into MongoDB
         new_member = {
             "name": name,
@@ -103,6 +111,7 @@ def add_member():
             "reports_to": reports_to,
             "picture": picture_path
         }
+        
 
         result = members.insert_one(new_member)
         logger.debug("Member added successfully: %s", new_member)
@@ -114,7 +123,7 @@ def add_member():
         logger.error("Error occurred during POST /members: %s", str(e))
         return jsonify({"error": str(e)}), 400
 
-    
+
 # GET Member Detail
 @app.route('/members/<member_id>', methods=['GET'])
 def get_member_detail(member_id):
