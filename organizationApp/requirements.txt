@@ -6,3 +6,4 @@ Werkzeug
 Flask-Testing
 pytest
 pytest-mock
+cloudinary==1.29.0
