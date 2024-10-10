@@ -57,7 +57,7 @@ def get_members():
     paginated_members = members.find(query).skip((page - 1) * per_page).limit(per_page)
 
     member_list = [
-        {"_id": str(member["_id"]), "name": member["name"], "position": member["position"], "picture": member["picture"]}
+        {"_id": str(member["_id"]), "name": member["name"], "position": member["position"], "picture": member["picture"], "reports_to": member["reports_to"]}
         for member in paginated_members
     ]
     return jsonify({
