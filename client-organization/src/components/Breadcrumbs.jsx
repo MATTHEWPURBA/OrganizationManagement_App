@@ -17,9 +17,12 @@ const Breadcrumbs = () => {
         {/* Home Link - Check if the current path is "/" */}
         <li className="inline-flex items-center">
           {location.pathname === '/' ? (
-            <span className="text-base font-medium text-white">Home</span>
+            <span className="text-lg font-medium text-white">Home</span>
           ) : (
-            <Link to="/" className="text-base font-medium text-gray-300 hover:text-white">
+            <Link
+              to="/"
+              className="text-lg font-medium text-gray-300 hover:text-white"
+            >
               Home
             </Link>
           )}
@@ -38,14 +41,14 @@ const Breadcrumbs = () => {
 
               {isLast ? (
                 // Current page: white color
-                <span className="ml-1 text-base font-medium text-white md:ml-2">
+                <span className="ml-1 text-lg font-medium text-white md:ml-2">
                   {label}
                 </span>
               ) : (
                 // Previous pages: grey color, hover to white
                 <Link
                   to={url}
-                  className="ml-1 text-base font-medium text-gray-300 hover:text-white md:ml-2"
+                  className="ml-1 text-lg font-medium text-gray-300 hover:text-white md:ml-2"
                 >
                   {label}
                 </Link>

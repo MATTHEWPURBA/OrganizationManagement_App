@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { capitalizeWords } from './utils';
 
 const MemberList = () => {
   const [members, setMembers] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState('');
+  const [sortConfig, setSortConfig] = useState({
+    key: 'name',
+    direction: 'asc',
+  });
   const [error, setError] = useState(null);
 
   const fetchMembers = async () => {
@@ -26,11 +31,32 @@ const MemberList = () => {
     fetchMembers();
   }, [page, search]);
 
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedMembers = [...members].sort((a, b) => {
+    if (a[sortConfig.key] < b[sortConfig.key]) {
+      return sortConfig.direction === 'asc' ? -1 : 1;
+    }
+    if (a[sortConfig.key] > b[sortConfig.key]) {
+      return sortConfig.direction === 'asc' ? 1 : -1;
+    }
+    return 0;
+  });
+
   return (
-    <div className="max-w-7xl mx-auto p-4">
-      <h1 className="text-4xl font-bold mb-8 text-center text-blue-700">
-        Member List
+    <div className="max-w-12xl mx-auto p-4">
+      <h1 className="text-4xl font-bold mb-2 text-left text-black-700">
+        Daftar Karyawan
       </h1>
+      <h2 className="text-lg text-gray-600 text-left mb-4">
+        Total {members.length} Karyawan
+      </h2>
 
       {/* Search Input */}
       <input
@@ -42,35 +68,64 @@ const MemberList = () => {
       />
 
       {/* Error Message */}
-      {error && <p className="text-red-500 text-center">{error}</p>}
+      {error && <p className="text-red-500 text-left">{error}</p>}
 
-      {/* Member List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {members.map((member) => (
-          <div
-            key={member._id}
-            className="bg-white border border-gray-300 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 ease-in-out"
-          >
-            {/* Member Image */}
-            <img
-              src={member.picture}
-              alt={`${member.name}'s profile`}
-              className="w-full h-56 object-cover"
-            />
-            {/* Member Details */}
-            <div className="p-6">
-              <h2 className="text-xl font-bold mb-2 text-gray-900">
-                {member.name}
-              </h2>
-              <h3 className="text-md text-gray-700 mb-4">
-                Position: {member.position}
-              </h3>
-              <p className="text-sm text-gray-500">
-                Reports To: {member.reports_to}
-              </p>
-            </div>
-          </div>
-        ))}
+      {/* Member Table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white border">
+          <thead>
+            <tr>
+              <th
+                className="px-6 py-3 border-b cursor-pointer text-left"
+                onClick={() => handleSort('name')}
+              >
+                Name{' '}
+                {sortConfig.key === 'name'
+                  ? sortConfig.direction === 'asc'
+                    ? '↑'
+                    : '↓'
+                  : ''}
+              </th>
+              <th
+                className="px-6 py-3 border-b cursor-pointer text-left"
+                onClick={() => handleSort('position')}
+              >
+                Position{' '}
+                {sortConfig.key === 'position'
+                  ? sortConfig.direction === 'asc'
+                    ? '↑'
+                    : '↓'
+                  : ''}
+              </th>
+              <th className="px-6 py-3 border-b text-left">Reports To</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedMembers.map((member) => (
+              <tr
+                key={member._id}
+                className="hover:bg-gray-100 transition-colors duration-200"
+              >
+                <td className="px-6 py-4 border-b text-left flex items-center">
+                  {/* Member Picture */}
+                  <img
+                    src={member.picture}
+                    alt={`${member.name}'s profile`}
+                    className="w-10 h-10 rounded-full mr-4 object-cover"
+                  />
+                  {/* Member Name */}
+                  {capitalizeWords(member.name)}
+                </td>
+                <td className="px-6 py-4 border-b text-left">
+                  {capitalizeWords(member.position)}
+                </td>
+                <td className="px-6 py-4 border-b text-left">
+                  {capitalizeWords(member.reports_to)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       {/* Pagination */}
