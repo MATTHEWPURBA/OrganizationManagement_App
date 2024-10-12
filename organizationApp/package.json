@@ -4,13 +4,12 @@
   "description": "Organization app backend using Flask and Python",
   "main": "index.js",
   "scripts": {
-    "setup": "chmod +x setup.sh && ./setup.sh", 
-    "start": "source .venv/bin/activate && python app.py", 
-    "env": "cp .env.example .env",  
+    "setup": "chmod +x setup.sh && ./setup.sh",
+    "start": "source .venv/bin/activate && python run.py",
+    "env": "cp .env.example .env",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC"
 }
-
